@@ -1,24 +1,11 @@
-"""
-github
-unique user
-unique business
-chat id
-"""
-
 from django.db import models
-
-
-class Chat(models.Model):
-    key = models.CharField(max_length=100, primary_key=True)
     
 
 class Business(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
-    bot_key = models.CharField(max_length=100, primary_key=True)
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-
+    
 
 class Instruction(models.Model):
     id = models.AutoField(primary_key=True)
@@ -38,8 +25,46 @@ class Instruction(models.Model):
         super(Instruction, self).save(*args, **kwargs)
 
 
-class User(models.model):
+class Origin(models.Model):
     id = models.AutoField(primary_key=True)
-    key = models.CharField(max_length=100, primary_key=True)
+    name = models.CharField(max_length=100, unique=True)
+
+
+class User(models.Model):
+    id = models.AutoField(primary_key=True)
+    business = models.ForeignKey(Business, on_delete=models.CASCADE)
+    key = models.CharField(max_length=100)
     name = models.CharField(max_length=100, blank=True, null=True)
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+    chat = models.CharField(max_length=100)
+    origin = models.ForeignKey(Origin, on_delete=models.CASCADE)
+    
+    def save(self, *args, **kwargs):
+        """ Validate that the key is unique for the business and origin """
+        bussiness_origin_users = User.objects.filter(
+            business=self.business, origin=self.origin
+        )
+        users_keys = list(map(
+            lambda user: user.key, bussiness_origin_users
+        ))
+        if self.key in users_keys:
+            raise Exception('Key already exists')
+        
+        super(User, self).save(*args, **kwargs)
+    
+    
+class Bot(models.Model):
+    id = models.AutoField(primary_key=True)
+    business = models.ForeignKey(Business, on_delete=models.CASCADE)
+    key = models.CharField(max_length=100)
+    origin = models.ForeignKey(Origin, on_delete=models.CASCADE)
+    
+    def save(self, *args, **kwargs):
+        """ Validate that the origin is unique for the business """
+        bussiness_bots = Bot.objects.filter(business=self.business)
+        bots_origins = list(map(
+            lambda bot: bot.origin, bussiness_bots
+        ))
+        if self.origin in bots_origins:
+            raise Exception('Origin already exists')
+        
+        super(Bot, self).save(*args, **kwargs)
