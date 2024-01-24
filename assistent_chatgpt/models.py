@@ -6,6 +6,9 @@ class Business(models.Model):
     name = models.CharField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
     
+    def __str__(self):
+        return self.name
+    
 
 class Instruction(models.Model):
     id = models.AutoField(primary_key=True)
@@ -13,21 +16,20 @@ class Instruction(models.Model):
     instruction = models.TextField()
     index = models.IntegerField(default=1)
     
-    def save(self, *args, **kwargs):
+    def __str__(self):
+        return f"{self.index}. {self.instruction[:20]}..."
+    
+    class Meta:
         """ Validate that the index is unique for the business """
-        bussiness_instructions = Instruction.objects.filter(business=self.business)
-        instructions_indexes = list(map(
-            lambda instruction: instruction.index, bussiness_instructions
-        ))
-        if self.index in instructions_indexes:
-            raise Exception('Index already exists')
-        
-        super(Instruction, self).save(*args, **kwargs)
+        unique_together = ('business', 'index')
 
 
 class Origin(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
+    
+    def __str__(self):
+        return self.name
 
 
 class User(models.Model):
@@ -38,18 +40,12 @@ class User(models.Model):
     chat = models.CharField(max_length=100)
     origin = models.ForeignKey(Origin, on_delete=models.CASCADE)
     
-    def save(self, *args, **kwargs):
+    class Meta:
         """ Validate that the key is unique for the business and origin """
-        bussiness_origin_users = User.objects.filter(
-            business=self.business, origin=self.origin
-        )
-        users_keys = list(map(
-            lambda user: user.key, bussiness_origin_users
-        ))
-        if self.key in users_keys:
-            raise Exception('Key already exists')
+        unique_together = ('business', 'key', 'origin')
         
-        super(User, self).save(*args, **kwargs)
+    def __str__(self):
+        return f"{self.key} ({self.origin})"
     
     
 class Bot(models.Model):
@@ -58,13 +54,9 @@ class Bot(models.Model):
     key = models.CharField(max_length=100)
     origin = models.ForeignKey(Origin, on_delete=models.CASCADE)
     
-    def save(self, *args, **kwargs):
+    class Meta:
         """ Validate that the origin is unique for the business """
-        bussiness_bots = Bot.objects.filter(business=self.business)
-        bots_origins = list(map(
-            lambda bot: bot.origin, bussiness_bots
-        ))
-        if self.origin in bots_origins:
-            raise Exception('Origin already exists')
-        
-        super(Bot, self).save(*args, **kwargs)
+        unique_together = ('business', 'origin')
+
+    def __str__(self):
+        return f"{self.key} ({self.origin})"

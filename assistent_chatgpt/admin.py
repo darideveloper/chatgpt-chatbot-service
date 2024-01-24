@@ -1,3 +1,41 @@
 from django.contrib import admin
+from . import models
 
-# Register your models here.
+admin.site.site_header = "ChatGPT Chatbot Service"
+admin.site.site_title = "ChatGPT Chatbot Service"
+admin.site.site_url = '/'
+admin.site.index_title = "Admin"
+
+
+@admin.register(models.Business)
+class BusinessAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'is_active')
+    list_filter = ('is_active',)
+    search_fields = ('name',)
+    
+    
+@admin.register(models.Instruction)
+class InstructionAdmin(admin.ModelAdmin):
+    list_display = ('index', 'instruction', 'business')
+    list_filter = ('business',)
+    ordering = ('business', 'index')
+    
+
+@admin.register(models.Origin)
+class OriginAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    search_fields = ('name',)
+    
+
+@admin.register(models.User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'business', 'key', 'name', 'chat', 'origin')
+    list_filter = ('business', 'origin')
+    search_fields = ('key', 'name', 'chat')
+    
+
+@admin.register(models.Bot)
+class BotAdmin(admin.ModelAdmin):
+    list_display = ('id', 'business', 'key', 'origin')
+    list_filter = ('business', 'origin')
+    search_fields = ('key',)
