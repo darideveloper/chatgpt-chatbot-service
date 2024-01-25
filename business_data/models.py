@@ -16,3 +16,7 @@ class RefaccionariaX(models.Model):
     
     def __str__(self):
         return f"({self.umero_de_pieza}) {self.nombre}"
+    
+    class Meta:
+        verbose_name_plural = "Refaccionaria X Products"
+        verbose_name = "Refaccionaria X Product"
