@@ -27,6 +27,42 @@ class RefaccionariaX(models.Model):
     def __str__(self):
         return f"({self.numero_de_pieza}) {self.nombre}"
     
+    def get_cols(self):
+        columns = [
+            'id',
+            'nombre',
+            'descripcion',
+            'fabricante',
+            'numero_de_pieza',
+            'categoria',
+            'precio',
+            'cantidad_en_stock',
+            'ubicacion',
+            'estante',
+            'modelo',
+            'ano'
+        ]
+        return ", ".join(columns)
+        
+    def get_str(self):
+        """ Return a string with all the fields of the model """
+        
+        values = [
+            str(self.id),
+            self.nombre,
+            self.descripcion,
+            self.fabricante,
+            self.numero_de_pieza,
+            self.categoria,
+            str(self.precio),
+            str(self.cantidad_en_stock),
+            self.ubicacion,
+            self.estante,
+            self.modelo,
+            self.ano
+        ]
+        return ", ".join(values)
+    
     class Meta:
         verbose_name_plural = "Refaccionaria X Products"
         verbose_name = "Refaccionaria X Product"
