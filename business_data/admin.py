@@ -41,12 +41,22 @@ class FileAdmin(admin.ModelAdmin):
         # Extract data from file
         functions[file_ext](file_path)
         
-        
         super(FileAdmin, self).save_model(request, obj, form, change)
 
 
 @admin.register(models.RefaccionariaX)
 class RefaccionariaXAdmin(admin.ModelAdmin):
+    list_display = ('id', 'nombre', 'descripcion', 'fabricante',
+                    'numero_de_pieza', 'categoria', 'precio',
+                    'cantidad_en_stock', 'ubicacion', 'modelo', 'ano')
+    search_fields = ('nombre', 'descripcion', 'fabricante',
+                     'numero_de_pieza', 'categoria', 'ubicacion',
+                     'modelo', 'ano')
+    list_filter = ('fabricante', 'categoria', 'modelo', 'ano')
+    
+    
+@admin.register(models.RefaccionariaY)
+class RefaccionariaYAdmin(admin.ModelAdmin):
     list_display = ('id', 'nombre', 'descripcion', 'fabricante',
                     'numero_de_pieza', 'categoria', 'precio',
                     'cantidad_en_stock', 'ubicacion', 'modelo', 'ano')

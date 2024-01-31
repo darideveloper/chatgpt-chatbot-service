@@ -13,6 +13,8 @@ class ChatBot():
     def __init__(self, instructions: list, products: list):
         """ Start basic chatbot """
         
+        print("Creating chatbot...")
+        
         # Generic final instruction
         instructions.append("A continuación se muestra en formato csv, "
                             "la información de los productos: ")
@@ -33,11 +35,17 @@ class ChatBot():
         )
     
     def create_chat(self):
+        
+        print("Creating chat...")
+        
         # Create new chat
         thread = self.client.beta.threads.create()
         return thread
         
     def send_message(self, thread, message):
+        
+        print(f"Sending message: {message} to chat {thread.id}")
+        
         # Add messages to the chat
         self.client.beta.threads.messages.create(
             thread_id=thread.id,
@@ -51,13 +59,14 @@ class ChatBot():
         run = self.client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=self.assistant.id,
-            # instructions="Please address the user as Jane Doe."
-            #              "The user has a premium account."
             timeout=30
         )
     
         # Wait until chatgot is complete
         while True:
+            
+            print(f"Getting response from chat {thread.id}...")
+            
             run = self.client.beta.threads.runs.retrieve(
                 thread_id=thread.id,
                 run_id=run.id
@@ -65,7 +74,7 @@ class ChatBot():
             if run.completed_at:
                 break
             sleep(2)
-        
+                    
         # Get response from chatgpt
         messages = self.client.beta.threads.messages.list(
             thread_id=thread.id

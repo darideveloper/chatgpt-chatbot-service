@@ -22,16 +22,31 @@ class Chat(View):
         json_data = request.body.decode('utf-8')
         data = json.loads(json_data)
         message = data['message']
+        business_name = data['business']
+        
+        # Tables relation
+        business_tables = {
+            "refaccionaria x": business_models.RefaccionariaX,
+            "refaccionaria y": business_models.RefaccionariaY,
+        }
+        
+        # Validate if the business name
+        if business_name not in business_tables:
+            return JsonResponse({
+                "status": "error",
+                "message": "The business name is not ready for process files",
+                "data": {}
+            }, status=400)
         
         # Get instructions
-        bussiness = business_models.Business.objects.get(name='refaccionaria x')
+        business = chat_models.Business.objects.get(name=business_name)
         instructions_objs = chat_models.Instruction.objects.filter(
-            business=bussiness,
+            business=business,
         ).order_by('index')
         instructions = [instruction.instruction for instruction in instructions_objs]
         
         # Get products
-        products_objs = business_models.RefaccionariaX.objects.all()
+        products_objs = business_tables[business_name].objects.all()
         columns = products_objs[0].get_cols()
         products = [product.get_str() for product in products_objs]
         products.insert(0, columns)
@@ -47,5 +62,17 @@ class Chat(View):
         try:
             response = chatbot.get_response(chat)
         except Exception:
-            return JsonResponse({'response': 'Error'})
-        return JsonResponse({'response': response})
+            return JsonResponse({
+                "status": "error",
+                "message": "Chatgpt is not responding",
+                "data": {}
+            }, status=500)
+            
+        # Return response
+        return JsonResponse({
+            "status": "success",
+            "message": "Chatgpt is responding",
+            "data": {
+                "response": response,
+            }
+        }, status=200)
