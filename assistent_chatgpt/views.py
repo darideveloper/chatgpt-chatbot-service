@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from .chatbot import ChatBot
-from business_data import models as business_models
+from business_data.models import business_tables
 from . import models as assistent_models
 
 # Load env variables
@@ -18,26 +18,34 @@ API_KEY_OPENAI = os.getenv("API_KEY_OPENAI")
 class Chat(View):
     def post(self, request):
         
+        # Instance chatbot
+        chatbot = ChatBot()
+        
         # Get user message from json
         json_data = request.body.decode('utf-8')
         data = json.loads(json_data)
-        message = data['message']
-        business_name = data['business']
-        user_key = data['user']['key']
-        user_origin = data['user']['origin']
-        user_name = data['user']['name']
+        message = data.get('message', '')
+        business_name = data.get('business', '')
+        user_key = data.get('user', {}).get('key', '')
+        user_origin = data.get('user', {}).get('origin', '')
+        user_name = data.get('user', {}).get('name', '')
         
-        # Tables relation
-        business_tables = {
-            "refaccionaria x": business_models.RefaccionariaX,
-            "refaccionaria y": business_models.RefaccionariaY,
-        }
+        # Validate required data
+        required_fields = [message, business_name, user_key, user_origin]
+        for field in required_fields:
+            if not field:
+                return JsonResponse({
+                    "status": "error",
+                    "message": "The message, business, "
+                               "user key and user origin are required",
+                    "data": {}
+                }, status=400)
         
         # Validate if the business name
         if business_name not in business_tables:
             return JsonResponse({
                 "status": "error",
-                "message": "The business name is not ready for process files",
+                "message": "The business name is not valid",
                 "data": {}
             }, status=400)
         
@@ -50,7 +58,7 @@ class Chat(View):
         )
         if user_found:
             # Get chat id
-            chat = user_found[0].chat
+            chat_id = user_found[0].chat
         else:
             # Validate origin
             origin = assistent_models.Origin.objects.filter(
@@ -61,41 +69,31 @@ class Chat(View):
             else:
                 return JsonResponse({
                     "status": "error",
-                    "message": "The user origin is not valid for this business",
+                    "message": "The user origin is not valid",
                     "data": {}
                 }, status=400)
-            
-            # Get instructions
-            instructions_objs = assistent_models.Instruction.objects.filter(
-                business=business,
-            ).order_by('index')
-            instructions = [instruction.instruction for instruction in instructions_objs]
-            
-            # Get products
-            products_objs = business_tables[business_name].objects.all()
-            columns = products_objs[0].get_cols()
-            products = [product.get_str() for product in products_objs]
-            products.insert(0, columns)
-            
-            # Initialize chatbot
-            chatbot = ChatBot(instructions, products)
-        
+                
             # Create chat
-            chat = chatbot.create_chat()
+            chat_id = chatbot.create_chat()
             
-            # Save user
+            # Save user in database
             assistent_models.User.objects.create(
                 business=business,
                 key=user_key,
                 name=user_name,
-                chat=chat,
-                origin=origin,
+                chat=chat_id,
+                origin=origin
             )
         
+        # Create assistent if not exists
+        assistent_id = business.bot_key
+        if not assistent_id:
+            assistent_id = chatbot.create_assistent_business(business_name)
+            
         # Send message and wait for response
-        chatbot.send_message(chat, message)
+        chatbot.send_message(chat_id, message)
         try:
-            response = chatbot.get_response(chat)
+            response = chatbot.get_response(chat_id, assistent_id)
         except Exception:
             return JsonResponse({
                 "status": "error",

@@ -124,3 +124,10 @@ class RefaccionariaY(models.Model):
     class Meta:
         verbose_name_plural = "Refaccionaria Y Products"
         verbose_name = "Refaccionaria Y Product"
+        
+        
+# Tables relation
+business_tables = {
+    "refaccionaria x": RefaccionariaX,
+    "refaccionaria y": RefaccionariaY,
+}

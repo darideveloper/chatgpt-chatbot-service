@@ -32,10 +32,3 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'business', 'key', 'name', 'chat', 'origin')
     list_filter = ('business', 'origin')
     search_fields = ('key', 'name', 'chat')
-    
-
-@admin.register(models.Bot)
-class BotAdmin(admin.ModelAdmin):
-    list_display = ('id', 'business', 'key', 'origin')
-    list_filter = ('business', 'origin')
-    search_fields = ('key',)
