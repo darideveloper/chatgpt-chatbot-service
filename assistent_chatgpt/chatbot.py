@@ -2,8 +2,6 @@ import os
 from time import sleep
 from openai import OpenAI
 from dotenv import load_dotenv
-from . import models as assistent_models
-from business_data.models import business_tables
 
 # Load env variables
 load_dotenv()
@@ -12,12 +10,12 @@ API_KEY_OPENAI = os.getenv("API_KEY_OPENAI")
 
 class ChatBot():
     
-    def __init__(self):
+    def __init__(self, Business, Instruction):
         """ Start basic chatbot
         
         Args:
-            instructions (list): assistent instructions
-            products (list): products in csv format
+            Business (class): business model
+            Instruction (class): instruction model
         """
         
         print("Creating chatbot...")
@@ -28,6 +26,10 @@ class ChatBot():
     
         # Connext openai
         self.client = OpenAI(api_key=API_KEY_OPENAI)
+        
+        # Save models
+        self.Business = Business
+        self.Instruction = Instruction
     
     def set_instructions(self, instructions: list):
         """ Set new instructions
@@ -82,12 +84,15 @@ class ChatBot():
             str: chatgpt assistant id
         """
         
+        # Import business tables
+        from business_data.models import business_tables
+        
         print(f"Creating assistent for business {business_name}...")
     
-        business = assistent_models.Business.objects.get(name=business_name)
+        business = self.Business.objects.get(name=business_name)
         
         # Get instructions
-        instructions_objs = assistent_models.Instruction.objects.filter(
+        instructions_objs = self.Instruction.objects.filter(
             business=business,
         ).order_by('index')
         instructions = [instruction.instruction for instruction in instructions_objs]
@@ -177,26 +182,3 @@ class ChatBot():
         )
         response = messages.data[0].content[0].text.value
         return response
-    
-    
-if __name__ == "__main__":
-    # Test chatbot
-    instructions = [
-        "Hola, soy un asistente virtual",
-        "Estoy aquí para ayudarte",
-        "Por favor, dime tu nombre"
-    ]
-    products = [
-        "ID,Nombre,Precio",
-        "1,Producto 1,100",
-        "2,Producto 2,200",
-        "3,Producto 3,300"
-    ]
-    chatbot = ChatBot(instructions, products)
-    assistent_id = chatbot.create_assistent()
-    chat_id = chatbot.create_chat()
-    
-    while True:
-        message = input("message: ")
-        chatbot.send_message(chat_id, message)
-        print(chatbot.get_response(chat_id, assistent_id))

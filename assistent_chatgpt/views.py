@@ -19,7 +19,10 @@ class Chat(View):
     def post(self, request):
         
         # Instance chatbot
-        chatbot = ChatBot()
+        chatbot = ChatBot(
+            assistent_models.Business,
+            assistent_models.Instruction
+        )
         
         # Get user message from json
         json_data = request.body.decode('utf-8')

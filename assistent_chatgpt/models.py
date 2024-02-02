@@ -1,6 +1,7 @@
 from django.db import models
+from .chatbot import ChatBot
     
-
+    
 class Business(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
@@ -27,6 +28,19 @@ class Instruction(models.Model):
     class Meta:
         """ Validate that the index is unique for the business """
         unique_together = ('business', 'index')
+        
+    def save(self, *args, **kwargs):
+        """ Update assistent each time an instruction is saved """
+        
+        # Create new assistent
+        chatbot = ChatBot(Business, Instruction)
+        assistent_id = chatbot.create_assistent_business(self.business.name)
+        
+        # Save chatbot id
+        self.business.bot_key = assistent_id
+        self.business.save()
+        
+        super(Instruction, self).save(*args, **kwargs)
 
 
 class Origin(models.Model):
