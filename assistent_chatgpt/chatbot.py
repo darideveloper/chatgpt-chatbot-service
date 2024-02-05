@@ -99,6 +99,11 @@ class ChatBot():
         
         # Get products
         products_objs = business_tables[business_name].objects.all()
+        
+        # Skip assistent creation if there are no products
+        if not products_objs:
+            return None
+        
         columns = products_objs[0].get_cols()
         products = [product.get_str() for product in products_objs]
         products.insert(0, columns)
