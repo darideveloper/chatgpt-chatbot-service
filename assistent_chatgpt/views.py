@@ -84,7 +84,7 @@ class Chat(View):
                 business=business,
                 key=user_key,
                 name=user_name,
-                chat=chat_key,
+                chat_key=chat_key,
                 origin=origin
             )
         
