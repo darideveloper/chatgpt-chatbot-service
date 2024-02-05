@@ -23,6 +23,7 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'assistent_chatgpt',
     'business_data',
+    'socials_chatbots',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
