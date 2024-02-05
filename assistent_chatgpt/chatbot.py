@@ -108,13 +108,13 @@ class ChatBot():
         self.set_products(products)
         
         # Create assistent
-        assistent_id = self.create_assistent()
+        assistent_key = self.create_assistent()
         
         # Update bot id in business
-        business.bot_key = assistent_id
+        business.assistent_key = assistent_key
         business.save()
         
-        return assistent_id
+        return assistent_key
         
     def create_chat(self) -> str:
         """ Credate and return chat id
@@ -129,28 +129,28 @@ class ChatBot():
         thread = self.client.beta.threads.create()
         return thread.id
         
-    def send_message(self, thread_id: str, message: str):
+    def send_message(self, chat_key: str, message: str):
         """ Send new message in specific chat
 
         Args:
-            thread_id (str): chatgpt chat id
+            chat_key (str): chatgpt chat id
             message (str): message sent from user
         """
         
-        print(f"Sending message: {message} to chat {thread_id}")
+        print(f"Sending message: {message} to chat {chat_key}")
         
         # Add messages to the chat
         self.client.beta.threads.messages.create(
-            thread_id=thread_id,
+            thread_id=chat_key,
             role="user",
             content=message
         )
     
-    def get_response(self, thread_id: str, assistant_id: str) -> str:
+    def get_response(self, chat_key: str, assistant_key: str) -> str:
         """ Wait in loop for a chatgpt response
 
         Args:
-            thread_id (str): chatgpot chat id
+            chat_key (str): chatgpot chat id
 
         Returns:
             str: chatgpt response
@@ -158,18 +158,18 @@ class ChatBot():
     
         # Start running chat in bg
         run = self.client.beta.threads.runs.create(
-            thread_id=thread_id,
-            assistant_id=assistant_id,
+            thread_id=chat_key,
+            assistant_id=assistant_key,
             timeout=30
         )
     
         # Wait until chatgot is complete
         while True:
             
-            print(f"Getting response from chat {thread_id}...")
+            print(f"Getting response from chat {chat_key}...")
             
             run = self.client.beta.threads.runs.retrieve(
-                thread_id=thread_id,
+                thread_id=chat_key,
                 run_id=run.id
             )
             if run.completed_at:
@@ -178,7 +178,7 @@ class ChatBot():
                     
         # Get response from chatgpt
         messages = self.client.beta.threads.messages.list(
-            thread_id=thread_id
+            thread_id=chat_key
         )
         response = messages.data[0].content[0].text.value
         return response

@@ -61,7 +61,7 @@ class Chat(View):
         )
         if user_found:
             # Get chat id
-            chat_id = user_found[0].chat
+            chat_key = user_found[0].chat_key
         else:
             # Validate origin
             origin = assistent_models.Origin.objects.filter(
@@ -77,26 +77,26 @@ class Chat(View):
                 }, status=400)
                 
             # Create chat
-            chat_id = chatbot.create_chat()
+            chat_key = chatbot.create_chat()
             
             # Save user in database
             assistent_models.User.objects.create(
                 business=business,
                 key=user_key,
                 name=user_name,
-                chat=chat_id,
+                chat=chat_key,
                 origin=origin
             )
         
         # Create assistent if not exists
-        assistent_id = business.bot_key
-        if not assistent_id:
-            assistent_id = chatbot.create_assistent_business(business_name)
+        assistent_key = business.assistent_key
+        if not assistent_key:
+            assistent_key = chatbot.create_assistent_business(business_name)
             
         # Send message and wait for response
-        chatbot.send_message(chat_id, message)
+        chatbot.send_message(chat_key, message)
         try:
-            response = chatbot.get_response(chat_id, assistent_id)
+            response = chatbot.get_response(chat_key, assistent_key)
         except Exception:
             return JsonResponse({
                 "status": "error",

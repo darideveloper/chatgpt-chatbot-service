@@ -6,7 +6,7 @@ class Business(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
-    bot_key = models.CharField(max_length=100, blank=True, null=True)
+    assistent_key = models.CharField(max_length=100, blank=True, null=True)
     
     def __str__(self):
         return self.name
@@ -37,7 +37,7 @@ class Instruction(models.Model):
         assistent_id = chatbot.create_assistent_business(self.business.name)
         
         # Save chatbot id
-        self.business.bot_key = assistent_id
+        self.business.assistent_key = assistent_id
         self.business.save()
         
         super(Instruction, self).save(*args, **kwargs)
@@ -56,7 +56,7 @@ class User(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
     key = models.CharField(max_length=100)
     name = models.CharField(max_length=100, blank=True, null=True)
-    chat = models.CharField(max_length=100)
+    chat_key = models.CharField(max_length=100)
     origin = models.ForeignKey(Origin, on_delete=models.CASCADE)
     
     class Meta:

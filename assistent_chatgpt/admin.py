@@ -9,9 +9,9 @@ admin.site.index_title = "Admin"
 
 @admin.register(models.Business)
 class BusinessAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'is_active')
+    list_display = ('id', 'name', 'is_active', 'assistent_key')
     list_filter = ('is_active',)
-    search_fields = ('name',)
+    search_fields = ('name', 'assistent_key')
     
     
 @admin.register(models.Instruction)
@@ -29,6 +29,6 @@ class OriginAdmin(admin.ModelAdmin):
 
 @admin.register(models.User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'business', 'key', 'name', 'chat', 'origin')
+    list_display = ('id', 'business', 'key', 'name', 'chat_key', 'origin')
     list_filter = ('business', 'origin')
-    search_fields = ('key', 'name', 'chat')
+    search_fields = ('key', 'name', 'chat_key')
