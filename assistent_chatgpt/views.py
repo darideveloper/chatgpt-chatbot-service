@@ -14,6 +14,14 @@ load_dotenv()
 API_KEY_OPENAI = os.getenv("API_KEY_OPENAI")
 
 
+def home(request):
+    return JsonResponse({
+        "status": "success",
+        "message": "Welcome to assistent chatgpt",
+        "data": {}
+    }, status=200)
+    
+
 @method_decorator(csrf_exempt, name='dispatch')
 class Chat(View):
     def post(self, request):
