@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from django.db import models
-from assistent_chatgpt.models import Business
+from assistent_chatgpt.models import Business, Origin
 import requests
 
 load_dotenv()
@@ -28,3 +28,16 @@ class TelegramToken(models.Model):
             raise Exception("Error setting webhook")
             
         super(TelegramToken, self).save(*args, **kwargs)
+        
+        
+class WelcomeMessage(models.Model):
+    origin = models.ForeignKey(Origin, on_delete=models.CASCADE)
+    business = models.ForeignKey(Business, on_delete=models.CASCADE)
+    message = models.TextField()
+    
+    def __str__(self):
+        return f"{self.origin} - {self.business}"
+    
+    class Meta:
+        """ Validate that the origin and business are unique together """
+        unique_together = ('origin', 'business')

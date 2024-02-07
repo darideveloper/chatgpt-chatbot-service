@@ -4,7 +4,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from threading import Thread
-from socials_chatbots.libs.telegram import send_response
+from socials_chatbots.libs import telegram
 from socials_chatbots import models as socials_chatbots_models
 from assistent_chatgpt import models as assistent_chatgpt_models
 
@@ -35,10 +35,34 @@ class TelegramChat(View):
         message_text = message["text"]
         message_chat_id = message["chat"]["id"]
         username = message["from"]["username"]
-
+        
+        if message_text in ["/start", "/iniciar"]:
+            # Get welcome message
+            origin_telegram = assistent_chatgpt_models.Origin.objects.get(
+                name="telegram"
+            )
+            welcome_message = socials_chatbots_models.WelcomeMessage.objects.get(
+                origin=origin_telegram,
+                business=business
+            ).message
+            
+            # Send welcome message to user
+            telegram.send_message(
+                bot_token=token,
+                user_key=message_chat_id,
+                message=welcome_message
+            )
+            
+            # Confirm start message received to telegram
+            return JsonResponse({
+                "status": "success",
+                "message": "Start message received",
+                "data": {}
+            }, status=200)
+                        
         # Send message in background
         message_thread = Thread(
-            target=send_response,
+            target=telegram.send_message_chatgpt,
             args=(
                 message_text,
                 business_name,
