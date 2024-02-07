@@ -41,10 +41,14 @@ class TelegramChat(View):
             origin_telegram = assistent_chatgpt_models.Origin.objects.get(
                 name="telegram"
             )
-            welcome_message = socials_chatbots_models.WelcomeMessage.objects.get(
+            welcome_message = socials_chatbots_models.WelcomeMessage.objects.filter(
                 origin=origin_telegram,
                 business=business
-            ).message
+            )
+            if welcome_message:
+                welcome_message = welcome_message[0].message
+            else:
+                welcome_message = "Bienvenido a nuestro chatbot"
             
             # Send welcome message to user
             telegram.send_message(
