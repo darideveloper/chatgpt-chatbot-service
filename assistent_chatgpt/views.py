@@ -102,7 +102,19 @@ class Chat(View):
             assistent_key = chatbot.create_assistent_business(business_name)
             
         # Send message and wait for response
-        chatbot.send_message(chat_key, message)
+        try:
+            chatbot.send_message(chat_key, message)
+        except Exception:
+            return JsonResponse({
+                "status": "success",
+                "message": "Chatgpt already loading",
+                "data": {
+                    "response": "Estamos procesando su mensaje anterior, "
+                                "espere un momento"
+                                "\nLe agradeceremos enviar un mensaje a la vez.",
+                }
+            }, status=200)
+        
         try:
             response = chatbot.get_response(chat_key, assistent_key)
         except Exception:
