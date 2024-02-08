@@ -28,6 +28,7 @@ class RefaccionariaX(models.Model):
         return f"({self.numero_de_pieza}) {self.nombre}"
     
     def get_cols(self):
+        """ Return table columns """
         columns = [
             'id',
             'nombre',
@@ -124,10 +125,60 @@ class RefaccionariaY(models.Model):
     class Meta:
         verbose_name_plural = "Refaccionaria Y Products"
         verbose_name = "Refaccionaria Y Product"
+
+
+class RefaccionariaGonzalez(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    sku = models.CharField(max_length=100)
+    brand = models.CharField(max_length=100)
+    origin = models.CharField(max_length=100)
+    compatibility = models.TextField()
+    price = models.FloatField()
+    category = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return f"({self.sku}) {self.name}"
+    
+    def get_cols(self):
+        """ Return table columns """
+        
+        columns = [
+            'id',
+            'Nombre del producto'
+            'Código universal de producto',
+            'Marca',
+            'Origen',
+            'Compatibilidad con vehículos',
+            'Precio',
+            'Categoría',
+            'Descripción de producto'
+        ]
+        return ", ".join(columns)
+    
+    def get_str(self):
+        """ Return a string with all the fields of the model """
+        
+        values = [
+            str(self.id),
+            self.name,
+            self.sku,
+            self.brand,
+            self.origin,
+            self.compatibility,
+            str(self.price),
+            self.category
+        ]
+        return ", ".join(values)
+    
+    class Meta:
+        verbose_name_plural = "Refaccionaria Gonzales Products"
+        verbose_name = "Refaccionaria Gonzales Product"
         
         
 # Tables relation
 business_tables = {
     "refaccionaria x": RefaccionariaX,
     "refaccionaria y": RefaccionariaY,
+    "refaccionaria gonzalez": RefaccionariaGonzalez,
 }

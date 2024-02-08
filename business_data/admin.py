@@ -64,3 +64,12 @@ class RefaccionariaYAdmin(admin.ModelAdmin):
                      'numero_de_pieza', 'categoria', 'ubicacion',
                      'modelo', 'ano')
     list_filter = ('fabricante', 'categoria', 'modelo', 'ano')
+
+    
+@admin.register(models.RefaccionariaGonzalez)
+class RefaccionariaGonzalezAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'sku', 'brand', 'origin',
+                    'price', 'category',)
+    search_fields = ('name', 'sku', 'brand', 'origin',
+                     'compatibility', 'category')
+    list_filter = ('brand', 'origin', 'category')
