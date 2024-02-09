@@ -22,10 +22,14 @@ class TelegramToken(models.Model):
         url = f"https://api.telegram.org/bot{self.token}" \
             f"/setWebhook?url={dynamic_webhook}"
         
+        print(f"updating telegram webhook to: {dynamic_webhook}")
+        
         # Send request to save webhook
         res = requests.get(url)
         if res.status_code != 200:
             raise Exception("Error setting webhook")
+        
+        print(f"webhook updated: {res.json()}")
             
         super(TelegramToken, self).save(*args, **kwargs)
         
