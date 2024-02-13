@@ -8,6 +8,7 @@ from django.utils.decorators import method_decorator
 from .chatbot import ChatBot
 from business_data.models import business_tables
 from . import models as assistent_models
+import urllib.parse
 
 # Load env variables
 load_dotenv()
@@ -117,12 +118,35 @@ class Chat(View):
         
         try:
             response = chatbot.get_response(chat_key, assistent_key)
+            print(f"chatgpt response: {response}")
         except Exception:
             return JsonResponse({
                 "status": "error",
                 "message": "Chatgpt is not responding",
                 "data": {}
             }, status=500)
+            
+        # Detect end of the chat with json response
+        if "json" in response:
+            
+            # Format response
+            response = response.replace("json", "").replace("```", "")
+            response = json.loads(response)
+            summary = ""
+            for response_key, response_value in response.items():
+                summary += f"{response_key}: {response_value}\n"
+                
+            # Create whatsapp link
+            summary = urllib.parse.quote(summary)
+            whatsapp_link = "https://api.whatsapp.com/" \
+                f"send?phone=5215549531504&text={summary}"
+            
+            # Go to sales message
+            message = f"Muchas gracias por usar nuestro asistente " \
+                f"virtual de {business_name}. " \
+                f"Continua con la compra en el siguiente enlace: {whatsapp_link}"
+                
+            response = message
             
         # Return response
         return JsonResponse({
