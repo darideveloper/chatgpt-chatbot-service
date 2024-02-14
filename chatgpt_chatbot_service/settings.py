@@ -7,6 +7,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Get current environment from global .env
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 ENV = os.environ.get("DJANGO_ENV", "prod")
+HOST = os.environ.get("HOST")
+print(f'Host: {HOST}')
 
 # load environment variables
 env_path = os.path.join(BASE_DIR, f'.env.{ENV}')

@@ -181,4 +181,5 @@ business_tables = {
     "refaccionaria x": RefaccionariaX,
     "refaccionaria y": RefaccionariaY,
     "refaccionaria gonzalez": RefaccionariaGonzalez,
+    "bancomext": None,
 }

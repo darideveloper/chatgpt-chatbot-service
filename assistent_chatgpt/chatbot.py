@@ -40,10 +40,6 @@ class ChatBot():
         
         print("Setting new instructions...")
         
-        # Generic final instruction
-        instructions.append("A continuación se muestra"
-                            "la información de los productos: ")
-        
         # Convert instructions and products to string
         self.instructions = "\n".join(instructions)
         
@@ -55,6 +51,10 @@ class ChatBot():
         """
         
         print("Setting new products...")
+        
+        # Generic final instruction
+        products.insert("A continuación se muestra"
+                        "la información de los productos: ", 0)
         
         self.products = "\n".join(products)
     
@@ -97,20 +97,21 @@ class ChatBot():
         ).order_by('index')
         instructions = [instruction.instruction for instruction in instructions_objs]
         
-        # Get products
-        products_objs = business_tables[business_name].objects.all()
-        
-        # Skip assistent creation if there are no products
-        if not products_objs:
-            return None
-        
-        columns = products_objs[0].get_cols()
-        products = [product.get_str() for product in products_objs]
-        products.insert(0, columns)
-        
-        # Set instructions and products
+        # Set instructions
         self.set_instructions(instructions)
-        self.set_products(products)
+        
+        # Get products
+        try:
+            products_objs = business_tables[business_name].objects.all()
+        except Exception:
+            products_objs = []
+            
+        if products_objs:
+            # Save products
+            columns = products_objs[0].get_cols()
+            products = [product.get_str() for product in products_objs]
+            products.insert(0, columns)
+            self.set_products(products)
         
         # Create assistent
         assistent_key = self.create_assistent()

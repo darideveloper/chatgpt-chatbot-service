@@ -66,7 +66,8 @@ class Chat(View):
         
         # Validate if user already exists
         user_found = assistent_models.User.objects.filter(
-            key=user_key
+            key=user_key,
+            business=business,
         )
         if user_found:
             # Get chat id

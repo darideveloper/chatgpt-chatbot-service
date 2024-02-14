@@ -18,6 +18,7 @@ class TelegramChat(View):
         # Get message
         json_data = json.loads(request.body)
         message = json_data.get("message", "")
+        print(f"Message received: {message}")
 
         # Return default confirmation message
         if not message:
@@ -34,7 +35,11 @@ class TelegramChat(View):
         # Get message part
         message_text = message["text"]
         message_chat_id = message["chat"]["id"]
-        username = message["from"]["username"]
+        username = message["from"].get("username", "")
+        if not username:
+            first_name = message["from"].get("first_name", "")
+            last_name = message["from"].get("last_name", "")
+            username = f"{first_name} {last_name}"
         
         if message_text in ["/start", "/iniciar"]:
             # Get welcome message
