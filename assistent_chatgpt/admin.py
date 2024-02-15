@@ -9,7 +9,7 @@ admin.site.index_title = "Admin"
 
 @admin.register(models.Business)
 class BusinessAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'is_active', 'assistent_key')
+    list_display = ('id', 'name', 'is_active', 'assistent_key', 'whatsapp_number')
     list_filter = ('is_active',)
     search_fields = ('name', 'assistent_key')
     

@@ -7,6 +7,7 @@ class Business(models.Model):
     name = models.CharField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
     assistent_key = models.CharField(max_length=100, blank=True, null=True)
+    whatsapp_number = models.CharField(max_length=100, blank=True, null=True)
     
     def __str__(self):
         return self.name

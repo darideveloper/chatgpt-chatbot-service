@@ -137,17 +137,26 @@ class Chat(View):
             for response_key, response_value in response.items():
                 summary += f"{response_key}: {response_value}\n"
                 
-            # Create whatsapp link
-            summary = urllib.parse.quote(summary)
-            whatsapp_link = "https://api.whatsapp.com/" \
-                f"send?phone=5215549531504&text={summary}"
-            
-            # Go to sales message
-            message = f"Muchas gracias por usar nuestro asistente " \
-                f"virtual de {business_name}. " \
-                f"Continua con la compra en el siguiente enlace: {whatsapp_link}"
+            # Get whatsapp number
+            whatsapp_number = business.whatsapp_number
+            base_message = f"Muchas gracias por usar nuestro asistente " \
+                           f"virtual de {business_name}. "
+                           
+            if whatsapp_number:
                 
-            response = message
+                # Create whatsapp link
+                summary = urllib.parse.quote(summary)
+                whatsapp_link = "https://api.whatsapp.com/" \
+                    f"send?phone={whatsapp_number}&text={summary}"
+                
+                # Go to sales message
+                message = f"{base_message} Continua con la compra en el " \
+                    f"siguiente enlace: {whatsapp_link}"
+                    
+                response = message
+            else:
+                response = f"{base_message} Contacta a ventas o visita " \
+                    "nuestra sucursal más cercana"
             
         # Return response
         return JsonResponse({
