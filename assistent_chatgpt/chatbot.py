@@ -1,7 +1,10 @@
 import os
+import json
 from time import sleep
 from openai import OpenAI
 from dotenv import load_dotenv
+from . import models as assistent_models
+import urllib.parse
 
 # Load env variables
 load_dotenv()
@@ -187,4 +190,107 @@ class ChatBot():
             thread_id=chat_key
         )
         response = messages.data[0].content[0].text.value
+        return response
+    
+    def workflow(self, message: str, business_name: str, user_key: str,
+                 user_origin: str, user_name: str) -> str:
+        """ Chatbot workflow: validate user info, business name, create assistent,
+        create chat, send message and get response from chatgpt """
+        
+        from business_data.models import business_tables
+    
+        # Validate required data
+        required_fields = [message, business_name, user_key, user_origin]
+        for field in required_fields:
+            if not field:
+                raise ValueError("The message, business, user key and "
+                                 "user origin are required")
+                
+        # Validate if the business name
+        if business_name not in business_tables:
+            raise ValueError("The business name is not valid")
+            
+        # Get business
+        business = assistent_models.Business.objects.get(name=business_name)
+        
+        # Validate if user already exists
+        user_found = assistent_models.User.objects.filter(
+            key=user_key,
+            business=business,
+        )
+        if user_found:
+            # Get chat id
+            chat_key = user_found[0].chat_key
+        else:
+            # Validate origin
+            origin = assistent_models.Origin.objects.filter(
+                name=user_origin
+            )
+            if origin:
+                origin = origin[0]
+            else:
+                raise ValueError("The user origin is not valid")
+                
+            # Create chat
+            chat_key = self.create_chat()
+            
+            # Save user in database
+            assistent_models.User.objects.create(
+                business=business,
+                key=user_key,
+                name=user_name,
+                chat_key=chat_key,
+                origin=origin
+            )
+            
+        # Create assistent if not exists
+        assistent_key = business.assistent_key
+        if not assistent_key:
+            assistent_key = self.create_assistent_business(business_name)
+        
+        # Send message and wait for response
+        error_mesage = "Chatgpt is not responding"
+        try:
+            self.send_message(chat_key, message)
+        except Exception:
+            raise ValueError(error_mesage)
+        
+        try:
+            response = self.get_response(chat_key, assistent_key)
+            print(f"chatgpt response: {response}")
+        except Exception:
+            raise ValueError(error_mesage)
+        
+        # Detect end of the chat with json response
+        if "json" in response:
+            
+            # Format response
+            response = response.replace("json", "").replace("```", "")
+            response = json.loads(response)
+            summary = ""
+            for response_key, response_value in response.items():
+                summary += f"{response_key}: {response_value}\n"
+                
+            # Get whatsapp number
+            whatsapp_number = business.whatsapp_number
+            base_message = f"Muchas gracias por usar nuestro asistente " \
+                           f"virtual de {business_name}. "
+                           
+            if whatsapp_number:
+                
+                # Create whatsapp link
+                summary = urllib.parse.quote(summary)
+                whatsapp_link = "https://api.whatsapp.com/" \
+                    f"send?phone={whatsapp_number}&text={summary}"
+                
+                # Go to sales message
+                message = f"{base_message} Continua con la compra en el " \
+                    f"siguiente enlace: {whatsapp_link}"
+                    
+                response = message
+            else:
+                response = f"{base_message} Contacta a ventas o visita " \
+                    "nuestra sucursal más cercana"
+            
+        # Return response
         return response

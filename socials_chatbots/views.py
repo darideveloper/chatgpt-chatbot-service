@@ -7,6 +7,7 @@ from threading import Thread
 from socials_chatbots.libs import telegram
 from socials_chatbots import models as socials_chatbots_models
 from assistent_chatgpt import models as assistent_chatgpt_models
+from assistent_chatgpt.chatbot import ChatBot
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -79,6 +80,8 @@ class TelegramChat(View):
                 message_chat_id,
                 "telegram",
                 token,
+                ChatBot,
+                assistent_chatgpt_models
             )
         )
         message_thread.start()

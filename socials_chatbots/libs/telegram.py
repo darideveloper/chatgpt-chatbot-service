@@ -1,6 +1,5 @@
 import json
 import requests
-from socials_chatbots.libs.assistent_chatgpt_api import get_message_chatgpt
 
 
 def send_message(bot_token: str, user_key: str, message: str):
@@ -26,7 +25,8 @@ def send_message(bot_token: str, user_key: str, message: str):
 
 
 def send_message_chatgpt(message: str, business: str, user_name: str,
-                         user_key: str, user_origin: str, bot_token: str) -> dict:
+                         user_key: str, user_origin: str, bot_token: str,
+                         chatbot_class: object, models_class: object) -> dict:
     """ Get data from assistent chatgpt api and send message to the user
 
     Args:
@@ -38,12 +38,17 @@ def send_message_chatgpt(message: str, business: str, user_name: str,
         bot_token (str): telegram bot token
     """
     
-    _, reponse = get_message_chatgpt(
+    chatbot = chatbot_class(
+        models_class.Business.objects.all(),
+        models_class.Instruction.objects.all(),
+    )
+    
+    reponse = chatbot.workflow(
         message=message,
-        business=business,
-        user_name=user_name,
+        business_name=business,
         user_key=user_key,
-        user_origin=user_origin
+        user_origin=user_origin,
+        user_name=user_name
     )
     
     log = f"Sending message from {business} to {user_key}: {reponse}"
