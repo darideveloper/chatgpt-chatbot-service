@@ -5,6 +5,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from . import models as assistent_models
 import urllib.parse
+import requests
 
 # Load env variables
 load_dotenv()
@@ -13,12 +14,13 @@ API_KEY_OPENAI = os.getenv("API_KEY_OPENAI")
 
 class ChatBot():
     
-    def __init__(self, Business, Instruction):
+    def __init__(self, Business, Instruction, data_files=[]):
         """ Start basic chatbot
         
         Args:
             Business (class): business model
             Instruction (class): instruction model
+            data_files (object): data files instances
         """
         
         print("Creating chatbot...")
@@ -33,6 +35,7 @@ class ChatBot():
         # Save models
         self.Business = Business
         self.Instruction = Instruction
+        self.data_files = data_files
     
     def set_instructions(self, instructions: list):
         """ Set new instructions
@@ -68,12 +71,27 @@ class ChatBot():
             str: chatgpt assistant id
         """
         
+        # Load files with chatgpt
+        files_ids = []
+        for data_file in self.data_files:
+            
+            # Download file with requests
+            res = requests.get(data_file.file_link)
+            
+            # Upload file to chatgpt
+            file = self.client.files.create(
+                file=res.content,
+                purpose='assistants'
+            )
+            files_ids.append(file.id)
+        
         # Create assistant
         assistant = self.client.beta.assistants.create(
             name="Asistente de Refaccionaria X",
             instructions=f"{self.instructions}\n\n{self.products}",
             tools=[{"type": "code_interpreter"}],
-            model="gpt-4-1106-preview"
+            model="gpt-4-1106-preview",
+            file_ids=files_ids,
         )
         return assistant.id
     

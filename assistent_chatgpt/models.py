@@ -33,8 +33,11 @@ class Instruction(models.Model):
     def save(self, *args, **kwargs):
         """ Update assistent each time an instruction is saved """
         
+        # Download data files
+        data_files = DataFile.objects.filter(business=self.business)
+        
         # Create new assistent
-        chatbot = ChatBot(Business, Instruction)
+        chatbot = ChatBot(Business, Instruction, data_files)
         assistent_id = chatbot.create_assistent_business(self.business.name)
         
         # Save chatbot id
@@ -66,3 +69,13 @@ class User(models.Model):
         
     def __str__(self):
         return f"{self.key} ({self.origin})"
+
+
+class DataFile(models.Model):
+    id = models.AutoField(primary_key=True)
+    business = models.ForeignKey(Business, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    file_link = models.TextField()
+    
+    def __str__(self):
+        return self.name
