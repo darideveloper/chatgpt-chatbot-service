@@ -34,7 +34,7 @@ class TelegramChat(View):
         token = socials_chatbots_models.TelegramToken.objects.get(business=business)
 
         # Get message part
-        message_text = message["text"]
+        message_text = message.get("text", "hola")
         message_chat_id = message["chat"]["id"]
         username = message["from"].get("username", "")
         if not username:
