@@ -32,10 +32,3 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'business', 'key', 'name', 'chat_key', 'origin')
     list_filter = ('business', 'origin')
     search_fields = ('key', 'name', 'chat_key')
-    
-
-@admin.register(models.DataFile)
-class DataFileAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'business', 'file_link')
-    list_filter = ('business',)
-    search_fields = ('name', 'file_link')

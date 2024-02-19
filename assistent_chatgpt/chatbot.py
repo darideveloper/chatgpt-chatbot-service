@@ -14,13 +14,13 @@ API_KEY_OPENAI = os.getenv("API_KEY_OPENAI")
 
 class ChatBot():
     
-    def __init__(self, Business, Instruction, data_files=[]):
+    def __init__(self, Business, Instruction, remote_files=[]):
         """ Start basic chatbot
         
         Args:
             Business (class): business model
             Instruction (class): instruction model
-            data_files (object): data files instances
+            remote_files (object): data files instances
         """
         
         print("Creating chatbot...")
@@ -35,7 +35,7 @@ class ChatBot():
         # Save models
         self.Business = Business
         self.Instruction = Instruction
-        self.data_files = data_files
+        self.remote_files = remote_files
     
     def set_instructions(self, instructions: list):
         """ Set new instructions
@@ -73,10 +73,10 @@ class ChatBot():
         
         # Load files with chatgpt
         files_ids = []
-        for data_file in self.data_files:
+        for remote_file in self.remote_files:
             
             # Download file with requests
-            res = requests.get(data_file.file_link)
+            res = requests.get(remote_file.file_link)
             
             # Upload file to chatgpt
             file = self.client.files.create(
