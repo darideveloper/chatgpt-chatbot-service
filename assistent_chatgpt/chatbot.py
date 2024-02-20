@@ -64,7 +64,7 @@ class ChatBot():
         
         self.products = "\n".join(products)
     
-    def create_assistent(self) -> str:
+    def create_assistent(self, business_name: str) -> str:
         """ Create assistant and return assistant id
         
         Returns:
@@ -87,10 +87,10 @@ class ChatBot():
         
         # Create assistant
         assistant = self.client.beta.assistants.create(
-            name="Asistente de Refaccionaria X",
+            name=f"Asistente {business_name}",
             instructions=f"{self.instructions}\n\n{self.products}",
             tools=[{"type": "code_interpreter"}],
-            model="gpt-4-1106-preview",
+            model="gpt-4-turbo-preview",
             file_ids=files_ids,
         )
         return assistant.id
@@ -135,7 +135,7 @@ class ChatBot():
             self.set_products(products)
         
         # Create assistent
-        assistent_key = self.create_assistent()
+        assistent_key = self.create_assistent(business_name)
         
         # Update bot id in business
         business.assistent_key = assistent_key
