@@ -134,7 +134,7 @@ class RefaccionariaGonzalez(models.Model):
     brand = models.CharField(max_length=100)
     origin = models.CharField(max_length=100)
     compatibility = models.TextField()
-    price = models.FloatField()
+    price = models.CharField(max_length=50)
     category = models.CharField(max_length=100)
     
     def __str__(self):
@@ -145,7 +145,7 @@ class RefaccionariaGonzalez(models.Model):
         
         columns = [
             'id',
-            'Nombre del producto'
+            'Nombre del producto',
             'Código universal de producto',
             'Marca',
             'Origen',
@@ -166,7 +166,7 @@ class RefaccionariaGonzalez(models.Model):
             self.brand,
             self.origin,
             self.compatibility,
-            str(self.price),
+            self.price,
             self.category
         ]
         return ", ".join(values)

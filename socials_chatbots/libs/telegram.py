@@ -39,8 +39,8 @@ def send_message_chatgpt(message: str, business: str, user_name: str,
     """
     
     chatbot = chatbot_class(
-        models_class.Business.objects.all(),
-        models_class.Instruction.objects.all(),
+        models_class.Business,
+        models_class.Instruction,
     )
     
     reponse = chatbot.workflow(

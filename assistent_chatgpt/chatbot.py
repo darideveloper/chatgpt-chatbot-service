@@ -5,7 +5,6 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from . import models as assistent_models
 import urllib.parse
-import requests
 
 # Load env variables
 load_dotenv()
@@ -24,10 +23,6 @@ class ChatBot():
         """
         
         print("Creating chatbot...")
-        
-        # Bot data
-        self.products = ""
-        self.instructions = ""
     
         # Connext openai
         self.client = OpenAI(api_key=API_KEY_OPENAI)
@@ -36,63 +31,51 @@ class ChatBot():
         self.Business = Business
         self.Instruction = Instruction
         self.remote_files = remote_files
-    
-    def set_instructions(self, instructions: list):
-        """ Set new instructions
         
+    def __get_business_instructions__(self, business_name: str) -> tuple:
+        """ Get business instructions
+
         Args:
-            instructions (list): new instructions
+            business_name (str): business name
+
+        Returns:
+            tuple:
+                (obj) business instance
+                (list) instructions texts
         """
         
-        print("Setting new instructions...")
+        business = self.Business.objects.get(name=business_name)
         
-        # Convert instructions and products to string
-        self.instructions = "\n".join(instructions)
+        # Get instructions
+        instructions_objs = self.Instruction.objects.filter(
+            business=business,
+        ).order_by('index')
+        instructions_text = [
+            instruction.instruction for instruction in instructions_objs
+        ]
         
-    def set_products(self, products: list):
-        """ Set new products
-        
-        Args:
-            products (list): new products
-        """
-        
-        print("Setting new products...")
-        
-        # Generic final instruction
-        products.insert("A continuación se muestra"
-                        "la información de los productos: ", 0)
-        
-        self.products = "\n".join(products)
+        return business, instructions_text
     
-    def create_assistent(self, business_name: str) -> str:
+    def create_assistent(self, business_name: str, first_instruction: str) -> str:
         """ Create assistant and return assistant id
+        
+        Args:
+            business_name (str): business name
+            first_instruction (str): first instruction
         
         Returns:
             str: chatgpt assistant id
         """
-        
-        # Load files with chatgpt
-        files_ids = []
-        for remote_file in self.remote_files:
-            
-            # Download file with requests
-            res = requests.get(remote_file.file_link)
-            
-            # Upload file to chatgpt
-            file = self.client.files.create(
-                file=res.content,
-                purpose='assistants'
-            )
-            files_ids.append(file.id)
-        
-        # Create assistant
+                
+        # Create assistant with initial instructions
         assistant = self.client.beta.assistants.create(
             name=f"Asistente {business_name}",
-            instructions=f"{self.instructions}\n\n{self.products}",
+            instructions=first_instruction,
             tools=[{"type": "code_interpreter"}],
             model="gpt-4-turbo-preview",
-            file_ids=files_ids,
+            # file_ids=files_ids,
         )
+        
         return assistant.id
     
     def create_assistent_business(self, business_name: str) -> str:
@@ -105,37 +88,13 @@ class ChatBot():
             str: chatgpt assistant id
         """
         
-        # Import business tables
-        from business_data.models import business_tables
-        
         print(f"Creating assistent for business {business_name}...")
     
-        business = self.Business.objects.get(name=business_name)
-        
-        # Get instructions
-        instructions_objs = self.Instruction.objects.filter(
-            business=business,
-        ).order_by('index')
-        instructions = [instruction.instruction for instruction in instructions_objs]
-        
-        # Set instructions
-        self.set_instructions(instructions)
-        
-        # Get products
-        try:
-            products_objs = business_tables[business_name].objects.all()
-        except Exception:
-            products_objs = []
-            
-        if products_objs:
-            # Save products
-            columns = products_objs[0].get_cols()
-            products = [product.get_str() for product in products_objs]
-            products.insert(0, columns)
-            self.set_products(products)
+        business, instructions_objs = self.__get_business_instructions__(business_name)
+        first_instruction = instructions_objs[0]
         
         # Create assistent
-        assistent_key = self.create_assistent(business_name)
+        assistent_key = self.create_assistent(business_name, first_instruction)
         
         # Update bot id in business
         business.assistent_key = assistent_key
@@ -143,8 +102,12 @@ class ChatBot():
         
         return assistent_key
         
-    def create_chat(self) -> str:
+    def create_chat(self, business_name: str, products: list) -> str:
         """ Credate and return chat id
+        
+        Args:
+            business_name (str): business name
+            products (list): products data in csv format
         
         Returns:
             str: chat gpt chat id
@@ -154,6 +117,24 @@ class ChatBot():
         
         # Create new chat
         thread = self.client.beta.threads.create()
+        
+        # Send remaining instructions as messages
+        _, instructions = self.__get_business_instructions__(business_name)
+        for instruction in instructions[1:]:
+            self.send_message(thread.id, instruction)
+            
+        # Split products in chunks
+        products_in_chunk = 5
+        products = [
+            products[i:i + products_in_chunk]
+            for i in range(0, len(products), products_in_chunk)
+        ]
+            
+        # Send products
+        for chunk in products:
+            products_text = "\n".join(chunk)
+            self.send_message(thread.id, products_text)
+            
         return thread.id
         
     def send_message(self, chat_key: str, message: str):
@@ -162,6 +143,7 @@ class ChatBot():
         Args:
             chat_key (str): chatgpt chat id
             message (str): message sent from user
+            role (str): user or assistant (default: user)
         """
         
         print(f"Sending message: {message} to chat {chat_key}")
@@ -249,8 +231,24 @@ class ChatBot():
             else:
                 raise ValueError("The user origin is not valid")
                 
+            # Get products data
+            try:
+                products_objs = business_tables[business_name].objects.all()
+            except Exception:
+                products_objs = []
+            
+            products = ""
+            if products_objs:
+                # Save products
+                columns = products_objs[0].get_cols()
+                products = [product.get_str() for product in products_objs]
+                products.insert(0, columns)
+            
             # Create chat
-            chat_key = self.create_chat()
+            chat_key = self.create_chat(
+                business_name=business_name,
+                products=products
+            )
             
             # Save user in database
             assistent_models.User.objects.create(

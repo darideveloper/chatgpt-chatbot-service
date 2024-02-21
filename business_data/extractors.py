@@ -123,7 +123,7 @@ def refaccionaria_gonzalez_xlsx(file_path: os.path):
             sku=str(row[2]).strip(),
             brand=row[3].strip(),
             origin=row[4].strip(),
-            compatibility=row[5].strip(),
+            compatibility=row[5].strip().replace("\n", "|"),
             price=row[6],
             category=row[7].strip()
         )
