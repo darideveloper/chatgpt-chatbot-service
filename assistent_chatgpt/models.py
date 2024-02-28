@@ -33,13 +33,8 @@ class Instruction(models.Model):
     def save(self, *args, **kwargs):
         """ Update assistent each time an instruction is saved """
         
-        from business_data.models import RemoteFile
-        
-        # Download data files
-        remote_files = RemoteFile.objects.filter(business=self.business)
-        
         # Create new assistent
-        chatbot = ChatBot(Business, Instruction, remote_files)
+        chatbot = ChatBot(Business, Instruction)
         assistent_id = chatbot.create_assistent_business(self.business.name)
         
         # Save chatbot id

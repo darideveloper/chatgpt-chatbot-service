@@ -13,13 +13,12 @@ API_KEY_OPENAI = os.getenv("API_KEY_OPENAI")
 
 class ChatBot():
     
-    def __init__(self, Business, Instruction, remote_files=[]):
+    def __init__(self, Business, Instruction):
         """ Start basic chatbot
         
         Args:
             Business (class): business model
             Instruction (class): instruction model
-            remote_files (object): data files instances
         """
         
         print("Creating chatbot...")
@@ -30,7 +29,6 @@ class ChatBot():
         # Save models
         self.Business = Business
         self.Instruction = Instruction
-        self.remote_files = remote_files
         
     def __get_business_instructions__(self, business_name: str) -> tuple:
         """ Get business instructions
@@ -124,7 +122,7 @@ class ChatBot():
             self.send_message(thread.id, instruction)
             
         # Split products in chunks
-        products_in_chunk = 5
+        products_in_chunk = 30
         products = [
             products[i:i + products_in_chunk]
             for i in range(0, len(products), products_in_chunk)

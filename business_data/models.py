@@ -174,16 +174,6 @@ class RefaccionariaGonzalez(models.Model):
     class Meta:
         verbose_name_plural = "Refaccionaria Gonzales Products"
         verbose_name = "Refaccionaria Gonzales Product"
-        
-        
-class RemoteFile(models.Model):
-    id = models.AutoField(primary_key=True)
-    business = models.ForeignKey(Business, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    file_link = models.TextField()
-    
-    def __str__(self):
-        return self.name
     
         
 # Excel tables relation

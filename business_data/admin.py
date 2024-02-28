@@ -73,10 +73,3 @@ class RefaccionariaGonzalezAdmin(admin.ModelAdmin):
     search_fields = ('name', 'sku', 'brand', 'origin',
                      'compatibility', 'category')
     list_filter = ('brand', 'origin', 'category')
-    
-    
-@admin.register(models.RemoteFile)
-class RemoteFileAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'business', 'file_link')
-    list_filter = ('business',)
-    search_fields = ('name', 'file_link')
