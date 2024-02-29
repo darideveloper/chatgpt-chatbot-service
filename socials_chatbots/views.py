@@ -7,6 +7,7 @@ from threading import Thread
 from socials_chatbots.libs import telegram
 from socials_chatbots import models as socials_chatbots_models
 from assistent_chatgpt import models as assistent_chatgpt_models
+from business_data.models import business_tables
 from assistent_chatgpt.chatbot import ChatBot
 
 
@@ -14,6 +15,12 @@ from assistent_chatgpt.chatbot import ChatBot
 class TelegramChat(View):
     def post(self, request, business_name):
         
+        # return JsonResponse({
+        #     "status": "success",
+        #     "message": "Message received",
+        #     "data": {}
+        # }, status=200)
+
         print(f"Webhook received for {business_name}")
         
         # Get message
@@ -32,7 +39,24 @@ class TelegramChat(View):
         # Get telegram token
         business = assistent_chatgpt_models.Business.objects.get(name=business_name)
         token = socials_chatbots_models.TelegramToken.objects.get(business=business)
-
+        
+        # Get unique categories from products model
+        categories_keyboard = {}
+        business_products = business_tables[business_name]
+        if business_products:
+            categories = business_products.objects.all().values("category").distinct()
+            categories = [category["category"] for category in categories]
+            
+            # Create custom keyboard with categories
+            buttons = []
+            for category in categories:
+                buttons.append([{"text": f"{category}"}])
+            
+            categories_keyboard = {
+                'keyboard': buttons,
+                'resize_keyboard': True
+            }
+            
         # Get message part
         message_text = message.get("text", "hola")
         message_chat_id = message["chat"]["id"]
@@ -60,7 +84,8 @@ class TelegramChat(View):
             telegram.send_message(
                 bot_token=token,
                 user_key=message_chat_id,
-                message=welcome_message
+                message=welcome_message,
+                keyboard=categories_keyboard,
             )
             
             # Confirm start message received to telegram
@@ -87,7 +112,8 @@ class TelegramChat(View):
                 "telegram",
                 token,
                 ChatBot,
-                assistent_chatgpt_models
+                assistent_chatgpt_models,
+                categories_keyboard,
             )
         )
         message_thread.start()
