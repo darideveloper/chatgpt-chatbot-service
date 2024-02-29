@@ -69,6 +69,12 @@ class TelegramChat(View):
                 "message": "Start message received",
                 "data": {}
             }, status=200)
+            
+        # Set typing action
+        telegram.set_typing(
+            bot_token=token,
+            user_key=message_chat_id
+        )
                         
         # Send message in background
         message_thread = Thread(

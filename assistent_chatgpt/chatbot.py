@@ -122,7 +122,7 @@ class ChatBot():
             self.send_message(thread.id, instruction)
             
         # Split products in chunks
-        products_in_chunk = 30
+        products_in_chunk = 20
         products = [
             products[i:i + products_in_chunk]
             for i in range(0, len(products), products_in_chunk)
@@ -229,18 +229,19 @@ class ChatBot():
             else:
                 raise ValueError("The user origin is not valid")
                 
-            # Get products data
-            try:
-                products_objs = business_tables[business_name].objects.all()
-            except Exception:
-                products_objs = []
+            # # Get products data
+            # try:
+            #     products_objs = business_tables[business_name].objects.all()
+            # except Exception:
+            #     products_objs = []
             
-            products = ""
-            if products_objs:
-                # Save products
-                columns = products_objs[0].get_cols()
-                products = [product.get_str() for product in products_objs]
-                products.insert(0, columns)
+            # products = ""
+            # if products_objs:
+            #     # Save products
+            #     columns = products_objs[0].get_cols()
+            #     products = [product.get_str() for product in products_objs]
+            #     products.insert(0, columns)
+            products = []
             
             # Create chat
             chat_key = self.create_chat(

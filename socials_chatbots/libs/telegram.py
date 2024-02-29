@@ -2,6 +2,28 @@ import json
 import requests
 
 
+def set_typing(bot_token: str, user_key: str):
+
+    url = f"https://api.telegram.org/bot{bot_token}/sendChatAction"
+
+    payload = json.dumps({
+        "chat_id": user_key,
+        "action": "typing"
+    })
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.request(
+        "POST",
+        url,
+        headers=headers,
+        data=payload
+    )
+
+    print(response.text)
+
+
 def send_message(bot_token: str, user_key: str, message: str):
     """ Send message to specific user in telegram
 
