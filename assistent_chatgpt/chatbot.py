@@ -99,14 +99,49 @@ class ChatBot():
         business.save()
         
         return assistent_key
+    
+    def load_products(self, user_key: str, user_origin: str,
+                      user_name: str, business_name: str,
+                      products_objs: list):
+        """ Send products to chatgpt as messages
+
+        Args:
+            products (list): products data in csv format
+        """
         
-    def create_chat(self, business_name: str, products: list) -> str:
+        chat_key = self.create_user_chat(
+            user_key=user_key,
+            user_origin=user_origin,
+            user_name=user_name,
+            business_name=business_name,
+        )
+        
+        # Get products data
+        products = ""
+        if products_objs:
+            # Save products
+            columns = products_objs[0].get_cols()
+            products = [product.get_str() for product in products_objs]
+            products.insert(0, columns)
+    
+        # Split products in chunks
+        products_in_chunk = 20
+        products = [
+            products[i:i + products_in_chunk]
+            for i in range(0, len(products), products_in_chunk)
+        ]
+            
+        # Send products
+        for chunk in products:
+            products_text = "\n".join(chunk)
+            self.send_message(chat_key, products_text)
+        
+    def create_chat(self, business_name: str) -> str:
         """ Credate and return chat id
         
         Args:
             business_name (str): business name
-            products (list): products data in csv format
-        
+            
         Returns:
             str: chat gpt chat id
         """
@@ -120,18 +155,6 @@ class ChatBot():
         _, instructions = self.__get_business_instructions__(business_name)
         for instruction in instructions[1:]:
             self.send_message(thread.id, instruction)
-            
-        # Split products in chunks
-        products_in_chunk = 20
-        products = [
-            products[i:i + products_in_chunk]
-            for i in range(0, len(products), products_in_chunk)
-        ]
-            
-        # Send products
-        for chunk in products:
-            products_text = "\n".join(chunk)
-            self.send_message(thread.id, products_text)
             
         return thread.id
         
@@ -190,24 +213,21 @@ class ChatBot():
         response = messages.data[0].content[0].text.value
         return response
     
-    def workflow(self, message: str, business_name: str, user_key: str,
-                 user_origin: str, user_name: str) -> str:
-        """ Chatbot workflow: validate user info, business name, create assistent,
-        create chat, send message and get response from chatgpt """
+    def create_user_chat(self, user_key: str, user_origin: str, user_name: str,
+                         business_name: str) -> str:
+        """ Create a new user in system and his chat
         
-        from business_data.models import business_tables
-    
-        # Validate required data
-        required_fields = [message, business_name, user_key, user_origin]
-        for field in required_fields:
-            if not field:
-                raise ValueError("The message, business, user key and "
-                                 "user origin are required")
-                
-        # Validate if the business name
-        if business_name not in business_tables:
-            raise ValueError("The business name is not valid")
-            
+        Args:
+            user_key (str): user key in the chat platform
+            user_origin (str): user chat platform (like telegram, whatsapp, etc.)
+            user_name (str): user username in the chat platform
+            business (object): business instance
+            business_name (str): business name
+        
+        Returns:
+            str: chatgpt chat id
+        """
+        
         # Get business
         business = assistent_models.Business.objects.get(name=business_name)
         
@@ -228,25 +248,10 @@ class ChatBot():
                 origin = origin[0]
             else:
                 raise ValueError("The user origin is not valid")
-                
-            # # Get products data
-            # try:
-            #     products_objs = business_tables[business_name].objects.all()
-            # except Exception:
-            #     products_objs = []
-            
-            # products = ""
-            # if products_objs:
-            #     # Save products
-            #     columns = products_objs[0].get_cols()
-            #     products = [product.get_str() for product in products_objs]
-            #     products.insert(0, columns)
-            products = []
             
             # Create chat
             chat_key = self.create_chat(
                 business_name=business_name,
-                products=products
             )
             
             # Save user in database
@@ -257,6 +262,44 @@ class ChatBot():
                 chat_key=chat_key,
                 origin=origin
             )
+            
+        return chat_key
+    
+    def workflow(self, message: str, business_name: str, user_key: str,
+                 user_origin: str, user_name: str) -> str:
+        """ Chatbot workflow: validate user info, business name, create assistent,
+            create chat, send message and get response from chatgpt
+        
+        Args:
+            message (str): user message
+            business_name (str): business name
+            user_key (str): user key in the chat platform
+            user_origin (str): user chat platform (like telegram, whatsapp, etc.)
+            user_name (str): user username in the chat platform
+        """
+        
+        from business_data.models import business_tables
+    
+        # Validate required data
+        required_fields = [message, business_name, user_key, user_origin]
+        for field in required_fields:
+            if not field:
+                raise ValueError("The message, business, user key and "
+                                 "user origin are required")
+                
+        # Validate if the business name
+        if business_name not in business_tables:
+            raise ValueError("The business name is not valid")
+            
+        # Get business
+        business = assistent_models.Business.objects.get(name=business_name)
+        
+        chat_key = self.create_user_chat(
+            user_key=user_key,
+            user_origin=user_origin,
+            user_name=user_name,
+            business_name=business_name,
+        )
             
         # Create assistent if not exists
         assistent_key = business.assistent_key

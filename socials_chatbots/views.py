@@ -42,6 +42,7 @@ class TelegramChat(View):
         
         # Get unique categories from products model
         categories_keyboard = {}
+        categories = []
         business_products = business_tables[business_name]
         if business_products:
             categories = business_products.objects.all().values("category").distinct()
@@ -66,7 +67,13 @@ class TelegramChat(View):
             last_name = message["from"].get("last_name", "")
             username = f"{first_name} {last_name}"
         
-        if message_text in ["/start", "/iniciar"]:
+        # Set typing action
+        telegram.set_typing(
+            bot_token=token,
+            user_key=message_chat_id
+        )
+        
+        if message_text in ["/start", "/iniciar", "Volver a categorías"]:
             # Get welcome message
             origin_telegram = assistent_chatgpt_models.Origin.objects.get(
                 name="telegram"
@@ -86,6 +93,7 @@ class TelegramChat(View):
                 user_key=message_chat_id,
                 message=welcome_message,
                 keyboard=categories_keyboard,
+                keyboard_text="Selecciona una categoría de productos para continuar:"
             )
             
             # Confirm start message received to telegram
@@ -94,12 +102,42 @@ class TelegramChat(View):
                 "message": "Start message received",
                 "data": {}
             }, status=200)
+        
+        # Catch category messages
+        products = []
+        if message_text in categories:
             
-        # Set typing action
-        telegram.set_typing(
-            bot_token=token,
-            user_key=message_chat_id
-        )
+            # Get products from category
+            products = business_products.objects.filter(category=message_text)
+            
+            telegram.load_products(
+                business=business_name,
+                user_name=username,
+                user_key=message_chat_id,
+                user_origin="telegram",
+                chatbot_class=ChatBot,
+                models_class=assistent_chatgpt_models,
+                products=products
+            )
+            
+            # Request more information
+            response = f"Indícame que producto buscas de la categoría {message_text}"
+            telegram.send_message(
+                bot_token=token,
+                user_key=message_chat_id,
+                message=response,
+                keyboard={
+                    'keyboard': [[{"text": "Volver a categorías"}]],
+                    'resize_keyboard': True
+                },
+            )
+            
+            # Confirm category message received to telegram
+            return JsonResponse({
+                "status": "success",
+                "message": "Category message received",
+                "data": {}
+            }, status=200)
                         
         # Send message in background
         message_thread = Thread(

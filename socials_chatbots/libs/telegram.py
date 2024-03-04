@@ -24,7 +24,8 @@ def set_typing(bot_token: str, user_key: str):
     print(response.text)
 
 
-def send_message(bot_token: str, user_key: str, message: str, keyboard: dict = {}):
+def send_message(bot_token: str, user_key: str, message: str,
+                 keyboard: dict = {}, keyboard_text: str = ""):
     """ Send message to specific user in telegram
 
     Args:
@@ -35,8 +36,8 @@ def send_message(bot_token: str, user_key: str, message: str, keyboard: dict = {
     """
     
     # Add select category to message
-    if keyboard:
-        message += "\n\nSelecciona una categoría de productos para continuar: "
+    if keyboard and keyboard_text:
+        message += f"\n\n{keyboard_text}"
     
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     data = {
@@ -53,10 +54,31 @@ def send_message(bot_token: str, user_key: str, message: str, keyboard: dict = {
     res.raise_for_status()
 
 
+def load_products(business: str, user_name: str,
+                  user_key: str, user_origin: str,
+                  chatbot_class: object, models_class: object,
+                  products: object):
+    """ Create a new user chat and load specific category products
+    """
+    
+    chatbot = chatbot_class(
+        models_class.Business,
+        models_class.Instruction,
+    )
+    
+    chatbot.load_products(
+        user_key=user_key,
+        user_origin=user_origin,
+        user_name=user_name,
+        business_name=business,
+        products_objs=products
+    )
+
+
 def send_message_chatgpt(message: str, business: str, user_name: str,
                          user_key: str, user_origin: str, bot_token: str,
                          chatbot_class: object, models_class: object,
-                         keyboard: dict = {}) -> dict:
+                         keyboard: dict) -> dict:
     """ Get data from assistent chatgpt api and send message to the user
 
     Args:
@@ -67,6 +89,7 @@ def send_message_chatgpt(message: str, business: str, user_name: str,
         user_origin (str): user chat platform (like telegram, whatsapp, etc.)
         bot_token (str): telegram bot token
         keyboard (dict): keyboard to send to the user
+        products (object): products from the business
     """
     
     chatbot = chatbot_class(
@@ -79,7 +102,7 @@ def send_message_chatgpt(message: str, business: str, user_name: str,
         business_name=business,
         user_key=user_key,
         user_origin=user_origin,
-        user_name=user_name
+        user_name=user_name,
     )
     
     log = f"Sending message from {business} to {user_key}: {reponse}"
