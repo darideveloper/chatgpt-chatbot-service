@@ -89,6 +89,8 @@ class ChatBot():
         print(f"Creating assistent for business {business_name}...")
     
         business, instructions_objs = self.__get_business_instructions__(business_name)
+        if not instructions_objs:
+            return ""
         first_instruction = instructions_objs[0]
         
         # Create assistent
