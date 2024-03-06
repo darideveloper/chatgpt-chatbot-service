@@ -289,9 +289,9 @@ class ChatBot():
                 raise ValueError("The message, business, user key and "
                                  "user origin are required")
                 
-        # Validate if the business name
-        if business_name not in business_tables:
-            raise ValueError("The business name is not valid")
+        # # Validate if the business name
+        # if business_name not in business_tables:
+        #     raise ValueError("The business name is not valid")
             
         # Get business
         business = assistent_models.Business.objects.get(name=business_name)
