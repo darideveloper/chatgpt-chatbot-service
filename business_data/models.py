@@ -182,4 +182,5 @@ business_tables = {
     "refaccionaria y": RefaccionariaY,
     "refaccionaria gonzalez": RefaccionariaGonzalez,
     "bancomext": None,
+    "Colegio Olssom": None,
 }
