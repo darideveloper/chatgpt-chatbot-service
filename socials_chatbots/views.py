@@ -43,7 +43,12 @@ class TelegramChat(View):
         # Get unique categories from products model
         categories_keyboard = {}
         categories = []
-        business_products = business_tables[business_name]
+        
+        try:
+            business_products = business_tables[business_name]
+        except KeyError:
+            business_products = None
+            
         if business_products:
             categories = business_products.objects.all().values("category").distinct()
             categories = [category["category"] for category in categories]
