@@ -72,12 +72,13 @@ class TelegramChat(View):
             last_name = message["from"].get("last_name", "")
             username = f"{first_name} {last_name}"
         
-        # Set typing action
-        telegram.set_typing(
-            bot_token=token,
-            user_key=message_chat_id
-        )
+        # Set typing action in background
+        Thread(
+            target=telegram.set_typing,
+            args=(token, message_chat_id)
+        ).start()
         
+        # Catch messages
         if message_text in ["/start", "/iniciar", "Volver a categorías"]:
             # Get welcome message
             origin_telegram = assistent_chatgpt_models.Origin.objects.get(

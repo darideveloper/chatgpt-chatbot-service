@@ -178,11 +178,16 @@ class ChatBot():
             content=message
         )
     
-    def get_response(self, chat_key: str, assistant_key: str) -> str:
+    def get_response(self, chat_key: str, assistant_key: str,
+                     set_typing: object, bot_token: str, user_key: str) -> str:
         """ Wait in loop for a chatgpt response
 
         Args:
             chat_key (str): chatgpot chat id
+            assistant_key (str): chatgpt assistant id
+            set_typing (object): set typing function
+            bot_token (str): telegram bot token
+            user_key (str): user key in the chat platform
 
         Returns:
             str: chatgpt response
@@ -200,12 +205,20 @@ class ChatBot():
             
             print(f"Getting response from chat {chat_key}...")
             
+            # Get response from chatgpt
             run = self.client.beta.threads.runs.retrieve(
                 thread_id=chat_key,
                 run_id=run.id
             )
             if run.completed_at:
                 break
+            
+            # Activate typing animation
+            set_typing(
+                bot_token,
+                user_key,
+            )
+            
             sleep(2)
                     
         # Get response from chatgpt
@@ -268,7 +281,8 @@ class ChatBot():
         return chat_key
     
     def workflow(self, message: str, business_name: str, user_key: str,
-                 user_origin: str, user_name: str) -> str:
+                 user_origin: str, user_name: str, set_typing: object,
+                 bot_token: str) -> str:
         """ Chatbot workflow: validate user info, business name, create assistent,
             create chat, send message and get response from chatgpt
         
@@ -278,20 +292,16 @@ class ChatBot():
             user_key (str): user key in the chat platform
             user_origin (str): user chat platform (like telegram, whatsapp, etc.)
             user_name (str): user username in the chat platform
+            set_typing (object): set typing function
+            bot_token (str): telegram bot token
         """
-        
-        from business_data.models import business_tables
-    
+            
         # Validate required data
         required_fields = [message, business_name, user_key, user_origin]
         for field in required_fields:
             if not field:
                 raise ValueError("The message, business, user key and "
                                  "user origin are required")
-                
-        # # Validate if the business name
-        # if business_name not in business_tables:
-        #     raise ValueError("The business name is not valid")
             
         # Get business
         business = assistent_models.Business.objects.get(name=business_name)
@@ -316,7 +326,13 @@ class ChatBot():
             raise ValueError(error_mesage)
         
         try:
-            response = self.get_response(chat_key, assistent_key)
+            response = self.get_response(
+                chat_key,
+                assistent_key,
+                set_typing,
+                bot_token,
+                user_key,
+            )
             print(f"chatgpt response: {response}")
         except Exception:
             raise ValueError(error_mesage)

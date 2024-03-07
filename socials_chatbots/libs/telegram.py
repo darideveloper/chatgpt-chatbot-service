@@ -8,21 +8,19 @@ def set_typing(bot_token: str, user_key: str):
 
     payload = json.dumps({
         "chat_id": user_key,
-        "action": "typing"
+        "action": "typing",
     })
     headers = {
         'Content-Type': 'application/json'
     }
 
-    response = requests.request(
+    requests.request(
         "POST",
         url,
         headers=headers,
         data=payload
     )
-
-    print(response.text)
-
+    
 
 def send_message(bot_token: str, user_key: str, message: str,
                  keyboard: dict = {}, keyboard_text: str = ""):
@@ -115,6 +113,8 @@ def send_message_chatgpt(message: str, business: str, user_name: str,
         user_key=user_key,
         user_origin=user_origin,
         user_name=user_name,
+        set_typing=set_typing,
+        bot_token=bot_token,
     )
     
     log = f"Sending message from {business} to {user_key}: {reponse}"
