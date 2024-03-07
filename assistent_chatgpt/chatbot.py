@@ -8,23 +8,23 @@ import urllib.parse
 
 # Load env variables
 load_dotenv()
-API_KEY_OPENAI = os.getenv("API_KEY_OPENAI")
 
 
 class ChatBot():
     
-    def __init__(self, Business, Instruction):
+    def __init__(self, Business, Instruction, api_key: str):
         """ Start basic chatbot
         
         Args:
             Business (class): business model
             Instruction (class): instruction model
+            api_key (str): openai api key
         """
         
         print("Creating chatbot...")
     
         # Connext openai
-        self.client = OpenAI(api_key=API_KEY_OPENAI)
+        self.client = OpenAI(api_key=api_key)
         
         # Save models
         self.Business = Business

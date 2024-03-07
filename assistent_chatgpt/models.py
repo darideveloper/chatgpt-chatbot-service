@@ -8,6 +8,7 @@ class Business(models.Model):
     is_active = models.BooleanField(default=True)
     assistent_key = models.CharField(max_length=100, blank=True, null=True)
     whatsapp_number = models.CharField(max_length=100, blank=True, null=True)
+    openai_apikey = models.CharField(max_length=100, blank=True, null=True)
     
     def __str__(self):
         return self.name
@@ -34,7 +35,7 @@ class Instruction(models.Model):
         """ Update assistent each time an instruction is saved """
         
         # Create new assistent
-        chatbot = ChatBot(Business, Instruction)
+        chatbot = ChatBot(Business, Instruction, self.business.openai_apikey)
         assistent_id = chatbot.create_assistent_business(self.business.name)
         
         # Save chatbot id

@@ -57,13 +57,24 @@ def send_message(bot_token: str, user_key: str, message: str,
 def load_products(business: str, user_name: str,
                   user_key: str, user_origin: str,
                   chatbot_class: object, models_class: object,
-                  products: object):
+                  products: object, openai_apikey: str):
     """ Create a new user chat and load specific category products
+    
+    Args:
+        business (str): bisiness name
+        user_name (str): user usernmame in the chat platform
+        user_key (str): user key in the chat platform
+        user_origin (str): user chat platform (like telegram, whatsapp, etc.)
+        chatbot_class (object): chatbot class
+        models_class (object): models class
+        products (object): products from the business
+        openai_apikey (str): openai api key
     """
     
     chatbot = chatbot_class(
         models_class.Business,
         models_class.Instruction,
+        openai_apikey,
     )
     
     chatbot.load_products(
@@ -78,7 +89,7 @@ def load_products(business: str, user_name: str,
 def send_message_chatgpt(message: str, business: str, user_name: str,
                          user_key: str, user_origin: str, bot_token: str,
                          chatbot_class: object, models_class: object,
-                         keyboard: dict) -> dict:
+                         keyboard: dict, openai_apikey: str) -> dict:
     """ Get data from assistent chatgpt api and send message to the user
 
     Args:
@@ -95,6 +106,7 @@ def send_message_chatgpt(message: str, business: str, user_name: str,
     chatbot = chatbot_class(
         models_class.Business,
         models_class.Instruction,
+        openai_apikey,
     )
     
     reponse = chatbot.workflow(

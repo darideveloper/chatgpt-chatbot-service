@@ -122,7 +122,8 @@ class TelegramChat(View):
                 user_origin="telegram",
                 chatbot_class=ChatBot,
                 models_class=assistent_chatgpt_models,
-                products=products
+                products=products,
+                openai_apikey=business.openai_apikey
             )
             
             # Request more information
@@ -157,6 +158,7 @@ class TelegramChat(View):
                 ChatBot,
                 assistent_chatgpt_models,
                 categories_keyboard,
+                business.openai_apikey,
             )
         )
         message_thread.start()
