@@ -70,7 +70,7 @@ class ChatBot():
             name=f"Asistente {business_name}",
             instructions=first_instruction,
             tools=[{"type": "code_interpreter"}],
-            model="gpt-4-turbo-preview",
+            model="gpt-3.5-turbo-0125",
             # file_ids=files_ids,
         )
         
