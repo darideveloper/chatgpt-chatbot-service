@@ -8,7 +8,8 @@ class Business(models.Model):
     is_active = models.BooleanField(default=True)
     assistent_key = models.CharField(max_length=100, blank=True, null=True)
     whatsapp_number = models.CharField(max_length=100, blank=True, null=True)
-    openai_apikey = models.CharField(max_length=100, blank=True, null=True)
+    openai_apikey = models.CharField(max_length=100, default="")
+    prompt = models.TextField(default="")
     
     def __str__(self):
         return self.name
@@ -16,7 +17,7 @@ class Business(models.Model):
     class Meta:
         verbose_name_plural = "Businesses"
         verbose_name = "Business"
-    
+                
 
 class Instruction(models.Model):
     id = models.AutoField(primary_key=True)

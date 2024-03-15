@@ -1,4 +1,3 @@
-import os
 import json
 from time import sleep
 from openai import OpenAI
@@ -91,7 +90,7 @@ class ChatBot():
         business, instructions_objs = self.__get_business_instructions__(business_name)
         if not instructions_objs:
             return ""
-        first_instruction = instructions_objs[0]
+        first_instruction = business.prompt
         
         # Create assistent
         assistent_key = self.create_assistent(business_name, first_instruction)
@@ -155,7 +154,7 @@ class ChatBot():
         
         # Send remaining instructions as messages
         _, instructions = self.__get_business_instructions__(business_name)
-        for instruction in instructions[1:]:
+        for instruction in instructions:
             self.send_message(thread.id, instruction)
             
         return thread.id
