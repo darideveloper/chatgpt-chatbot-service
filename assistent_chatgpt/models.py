@@ -1,6 +1,7 @@
 from django.db import models
 from .chatbot import ChatBot
-    
+from django.contrib.auth.models import User as AuthUser
+
     
 class Business(models.Model):
     id = models.AutoField(primary_key=True)
@@ -10,6 +11,7 @@ class Business(models.Model):
     whatsapp_number = models.CharField(max_length=100, blank=True, null=True)
     openai_apikey = models.CharField(max_length=100, default="")
     prompt = models.TextField(default="")
+    auth_user = models.ForeignKey(AuthUser, on_delete=models.CASCADE)
     
     def __str__(self):
         return self.name

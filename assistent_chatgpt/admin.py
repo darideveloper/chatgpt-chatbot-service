@@ -16,9 +16,9 @@ admin.site.index_title = "Admin"
 
 @admin.register(models.Business)
 class BusinessAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'is_active', 'assistent_key')
-    list_filter = ('is_active',)
-    search_fields = ('name', 'assistent_key', 'prompt')
+    list_display = ('id', 'name', 'is_active', 'assistent_key', 'auth_user')
+    list_filter = ('is_active', 'auth_user')
+    search_fields = ('name', 'assistent_key', 'prompt', 'auth_user')
     
     
 @admin.register(models.Instruction)
