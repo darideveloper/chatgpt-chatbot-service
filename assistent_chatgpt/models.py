@@ -23,14 +23,9 @@ class Instruction(models.Model):
     id = models.AutoField(primary_key=True)
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
     instruction = models.CharField(max_length=15000)
-    index = models.IntegerField(default=1)
     
     def __str__(self):
-        return f"{self.index}. {self.instruction[:20]}..."
-    
-    class Meta:
-        """ Validate that the index is unique for the business """
-        unique_together = ('business', 'index')
+        return f"{self.id}. {self.instruction[:20]}..."
         
     def save(self, *args, **kwargs):
         """ Update assistent each time an instruction is saved """

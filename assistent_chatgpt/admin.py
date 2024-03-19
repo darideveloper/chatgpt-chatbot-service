@@ -23,9 +23,9 @@ class BusinessAdmin(admin.ModelAdmin):
     
 @admin.register(models.Instruction)
 class InstructionAdmin(admin.ModelAdmin):
-    list_display = ('index', 'instruction', 'business')
+    list_display = ('id', 'instruction', 'business')
     list_filter = ('business',)
-    ordering = ('business', 'index')
+    ordering = ('id', 'business')
     
     # Custom error when save model
     def save_model(self, request, obj, form, change):

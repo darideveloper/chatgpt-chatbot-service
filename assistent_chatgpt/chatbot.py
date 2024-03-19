@@ -46,7 +46,7 @@ class ChatBot():
         # Get instructions
         instructions_objs = self.Instruction.objects.filter(
             business=business,
-        ).order_by('index')
+        ).order_by('id')
         instructions_text = [
             instruction.instruction for instruction in instructions_objs
         ]
