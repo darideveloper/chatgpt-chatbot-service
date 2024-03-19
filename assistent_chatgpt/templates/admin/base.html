@@ -1,0 +1,21 @@
+{% extends 'admin/base.html' %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    [data-filter-title="Bot"] [href="?"] {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
+{% block footer %}
+<script>
+
+    const numInstructionsElem = document.querySelector('.actions + .paginator')
+    const numInstructionsText = numInstructionsElem.textContent.trim()
+    if (numInstructionsText == '0 instructions') {
+        numInstructionsElem.innerHTML = 'Select a Bot'
+    }
+</script>
+{% endblock %}

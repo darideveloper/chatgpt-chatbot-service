@@ -14,6 +14,49 @@ admin.site.site_url = '/'
 admin.site.index_title = "Admin"
 
 
+class InstrucctionUserListFilter(admin.SimpleListFilter):
+
+    # Label
+    title = "Bot"
+    parameter_name = "bot"
+    
+    def lookups(self, request, model_admin) -> list:
+        """ Generate options list
+        
+        Returns:
+            list: list of tuples with options
+        """
+        
+        auth_user = request.user
+                
+        # Get all business from instruction
+        instructions = model_admin.model.objects.all()
+        businesses = list(map(lambda instruction: instruction.business, instructions))
+        if auth_user.is_superuser:
+            businesses_user = businesses
+        else:
+            businesses_user = list(filter(
+                lambda business: business.auth_user == auth_user, businesses
+            ))
+        businesses_unique = list(set(businesses_user))
+        options = []
+        for business in businesses_unique:
+            options.append((business.name, business.name))
+        
+        return options
+    
+    def queryset(self, request, queryset):
+        """ Returns the filtered queryset based on the value
+        provided in the query string and retrievable via
+        """
+        
+        data = queryset.filter(
+            business__name=self.value()
+        )
+        
+        return data
+    
+
 @admin.register(models.Business)
 class BusinessAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'is_active', 'assistent_key', 'auth_user')
@@ -24,7 +67,7 @@ class BusinessAdmin(admin.ModelAdmin):
 @admin.register(models.Instruction)
 class InstructionAdmin(admin.ModelAdmin):
     list_display = ('id', 'instruction', 'business')
-    list_filter = ('business',)
+    list_filter = (InstrucctionUserListFilter,)
     ordering = ('id', 'business')
     
     # Custom error when save model
@@ -46,6 +89,23 @@ class InstructionAdmin(admin.ModelAdmin):
             return
         else:
             super(InstructionAdmin, self).save_model(request, obj, form, change)
+            
+    def get_queryset(self, request):
+            
+        # Get admin type
+        user_auth = request.user
+        if not user_auth.is_superuser:
+            
+            # Filter instructions by user
+            return models.Instruction.objects.filter(business__auth_user=user_auth)
+            
+        # Render all instructions
+        return models.Instruction.objects.all()
+    
+    # Custom filters
+    # https://docs.djangoproject.com/en/5.0/ref/contrib/admin/filters/
+    
+    
         
 
 @admin.register(models.Origin)

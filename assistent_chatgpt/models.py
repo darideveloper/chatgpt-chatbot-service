@@ -19,7 +19,7 @@ class Business(models.Model):
     class Meta:
         verbose_name_plural = "Businesses"
         verbose_name = "Business"
-                
+        
 
 class Instruction(models.Model):
     id = models.AutoField(primary_key=True)
@@ -41,7 +41,7 @@ class Instruction(models.Model):
         self.business.save()
         
         super(Instruction, self).save(*args, **kwargs)
-
+        
 
 class Origin(models.Model):
     id = models.AutoField(primary_key=True)
