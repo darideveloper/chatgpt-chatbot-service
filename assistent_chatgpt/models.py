@@ -22,7 +22,7 @@ class Business(models.Model):
 class Instruction(models.Model):
     id = models.AutoField(primary_key=True)
     business = models.ForeignKey(Business, on_delete=models.CASCADE)
-    instruction = models.TextField()
+    instruction = models.CharField(max_length=15000)
     index = models.IntegerField(default=1)
     
     def __str__(self):

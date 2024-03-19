@@ -1,5 +1,12 @@
-from django.contrib import admin
+import os
+from dotenv import load_dotenv
 from . import models
+from django.contrib import admin
+
+# env variabled
+load_dotenv()
+MAX_INSTRUCTIONS = int(os.getenv("MAX_INSTRUCTIONS", 10))
+
 
 admin.site.site_header = "ChatGPT Chatbot Service"
 admin.site.site_title = "ChatGPT Chatbot Service"
@@ -20,6 +27,26 @@ class InstructionAdmin(admin.ModelAdmin):
     list_filter = ('business',)
     ordering = ('business', 'index')
     
+    # Custom error when save model
+    def save_model(self, request, obj, form, change):
+        
+        # Count instructions
+        instructions_num = models.Instruction.objects.filter(
+            business=obj.business
+        ).count()
+        
+        # Show error message to user in admin
+        if instructions_num > MAX_INSTRUCTIONS:
+            self.message_user(
+                request,
+                f"Exceeded the maximum number of instructions"
+                f" for the business '{obj.business.name}'",
+                level='ERROR'
+            )
+            return
+        else:
+            super(InstructionAdmin, self).save_model(request, obj, form, change)
+        
 
 @admin.register(models.Origin)
 class OriginAdmin(admin.ModelAdmin):
