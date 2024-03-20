@@ -13,8 +13,8 @@ class Business(models.Model):
     openai_apikey = models.CharField(max_length=100, default="")
     prompt = models.TextField(default="")
     auth_user = models.ForeignKey(AuthUser, on_delete=models.CASCADE)
-    end_message_1 = models.TextField(default="")
-    end_message_2 = models.TextField(default="")
+    end_message_1 = models.TextField(default="", blank=True, null=True)
+    end_message_2 = models.TextField(default="", blank=True, null=True)
     
     def __str__(self):
         return self.name
