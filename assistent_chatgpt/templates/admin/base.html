@@ -6,16 +6,30 @@
     [data-filter-title="Bot"] [href="?"] {
         display: none !important;
     }
+
+    .hidden {
+        display: none !important;
+    }
 </style>
 {% endblock %}
 
 {% block footer %}
 <script>
 
+    // Show a message when no bot is selected
     const numInstructionsElem = document.querySelector('.actions + .paginator')
     const numInstructionsText = numInstructionsElem.textContent.trim()
     if (numInstructionsText == '0 instructions') {
         numInstructionsElem.innerHTML = 'Select a Bot'
     }
+
+    // Hide confirmation message when no save instruction
+    const error_message = document.querySelector('.messagelist .error')
+    const success_message = document.querySelector('.messagelist .success')
+    const error_message_text = error_message.textContent.trim()
+    if (error_message_text.includes("Exceeded the maximum number of instructions for the business")) {
+        success_message.classList.add('hidden')
+    }
+
 </script>
 {% endblock %}

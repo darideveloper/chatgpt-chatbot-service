@@ -79,7 +79,7 @@ class InstructionAdmin(admin.ModelAdmin):
         ).count()
         
         # Show error message to user in admin
-        if instructions_num > MAX_INSTRUCTIONS:
+        if instructions_num >= MAX_INSTRUCTIONS:
             self.message_user(
                 request,
                 f"Exceeded the maximum number of instructions"
