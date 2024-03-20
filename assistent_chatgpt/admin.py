@@ -102,12 +102,7 @@ class InstructionAdmin(admin.ModelAdmin):
         # Render all instructions
         return models.Instruction.objects.all()
     
-    # Custom filters
-    # https://docs.djangoproject.com/en/5.0/ref/contrib/admin/filters/
     
-    
-        
-
 @admin.register(models.Origin)
 class OriginAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
@@ -116,6 +111,7 @@ class OriginAdmin(admin.ModelAdmin):
 
 @admin.register(models.User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'business', 'key', 'name', 'chat_key', 'origin')
-    list_filter = ('business', 'origin')
+    list_display = ('id', 'business', 'key', 'name', 'chat_key',
+                    'origin', 'last_update', 'end_messages_sent')
+    list_filter = ('business', 'origin', 'last_update')
     search_fields = ('key', 'name', 'chat_key')

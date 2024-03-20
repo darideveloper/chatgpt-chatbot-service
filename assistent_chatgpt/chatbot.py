@@ -4,6 +4,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from . import models as assistent_models
 import urllib.parse
+from django.utils import timezone
 
 # Load env variables
 load_dotenv()
@@ -294,6 +295,18 @@ class ChatBot():
             set_typing (object): set typing function
             bot_token (str): telegram bot token
         """
+        
+        # Get business
+        business = assistent_models.Business.objects.get(name=business_name)
+        
+        # Save user in order to update last_update
+        user = assistent_models.User.objects.get(
+            key=user_key,
+            business=business,
+        )
+        user.end_messages_sent = False
+        user.last_update = timezone.now()
+        user.save()
             
         # Validate required data
         required_fields = [message, business_name, user_key, user_origin]
@@ -301,9 +314,6 @@ class ChatBot():
             if not field:
                 raise ValueError("The message, business, user key and "
                                  "user origin are required")
-            
-        # Get business
-        business = assistent_models.Business.objects.get(name=business_name)
         
         chat_key = self.create_user_chat(
             user_key=user_key,

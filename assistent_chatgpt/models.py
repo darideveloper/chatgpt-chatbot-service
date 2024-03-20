@@ -1,6 +1,7 @@
 from django.db import models
 from .chatbot import ChatBot
 from django.contrib.auth.models import User as AuthUser
+from django.utils import timezone
 
     
 class Business(models.Model):
@@ -12,6 +13,8 @@ class Business(models.Model):
     openai_apikey = models.CharField(max_length=100, default="")
     prompt = models.TextField(default="")
     auth_user = models.ForeignKey(AuthUser, on_delete=models.CASCADE)
+    end_message_1 = models.TextField(default="")
+    end_message_2 = models.TextField(default="")
     
     def __str__(self):
         return self.name
@@ -58,6 +61,8 @@ class User(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
     chat_key = models.CharField(max_length=100)
     origin = models.ForeignKey(Origin, on_delete=models.CASCADE)
+    last_update = models.DateTimeField()
+    end_messages_sent = models.BooleanField(default=False)
     
     class Meta:
         """ Validate that the key is unique for the business and origin """
