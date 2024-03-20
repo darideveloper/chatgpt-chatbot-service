@@ -1,7 +1,6 @@
 from django.db import models
 from .chatbot import ChatBot
 from django.contrib.auth.models import User as AuthUser
-from django.utils import timezone
 
     
 class Business(models.Model):

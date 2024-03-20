@@ -275,7 +275,8 @@ class ChatBot():
                 key=user_key,
                 name=user_name,
                 chat_key=chat_key,
-                origin=origin
+                origin=origin,
+                last_update=timezone.now(),
             )
             
         return chat_key
@@ -298,15 +299,6 @@ class ChatBot():
         
         # Get business
         business = assistent_models.Business.objects.get(name=business_name)
-        
-        # Save user in order to update last_update
-        user = assistent_models.User.objects.get(
-            key=user_key,
-            business=business,
-        )
-        user.end_messages_sent = False
-        user.last_update = timezone.now()
-        user.save()
             
         # Validate required data
         required_fields = [message, business_name, user_key, user_origin]
@@ -376,6 +368,15 @@ class ChatBot():
             else:
                 response = f"{base_message} Contacta a ventas o visita " \
                     "nuestra sucursal más cercana"
-            
+    
+        # Save user in order to update last_update
+        user = assistent_models.User.objects.get(
+            key=user_key,
+            business=business,
+        )
+        user.end_messages_sent = False
+        user.last_update = timezone.now()
+        user.save()
+    
         # Return response
         return response
